@@ -14,7 +14,6 @@ import com.kelompok9.projekantrian.helper.User
 import kotlinx.android.synthetic.main.antrian_activity.*
 import kotlinx.android.synthetic.main.form_antrian_activity.*
 import kotlinx.android.synthetic.main.form_antrian_activity.btn_ambil_antrian
-import kotlinx.android.synthetic.main.form_antrian_activity.*
 import kotlinx.android.synthetic.main.login_activity.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
