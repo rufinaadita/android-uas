@@ -33,25 +33,25 @@ class LoginActivity : AppCompatActivity() {
             val url = "http://192.168.100.85:8012/antrian-api/public/api/user/login"
 
             val jsonRequest = JsonObjectRequest(Request.Method.POST, url, jsonobj,
-                    Response.Listener { response ->
-                        val data = response.getJSONObject("data")
-                        val user = User(
-                                id = data.getString("id"),
-                                name = data.getString("name"),
-                                email = data.getString("email")
-                        )
-                        Session.id = user.id
-                        Toast.makeText(this, "Anda Berhasil Login ${data.getString("name")}", Toast.LENGTH_SHORT).show()
-                        GlobalScope.launch {
-                            delay(2000L)
-                            val intent = Intent(this@LoginActivity, QueueActivity::class.java)
-                            intent.putExtra(QueueActivity.EXTRA_DATA, user)
-                            startActivity(intent)
-                        }
-                    },
-                    Response.ErrorListener {
-                        Toast.makeText(this, "aaa", Toast.LENGTH_SHORT).show()
-                    })
+                Response.Listener { response ->
+                    val data = response.getJSONObject("data")
+                    val user = User(
+                        id = data.getString("id"),
+                        name = data.getString("name"),
+                        email = data.getString("email")
+                    )
+                    Session.id = user.id
+                    Toast.makeText(this, "Anda Berhasil Login ${data.getString("name")}", Toast.LENGTH_SHORT).show()
+                    GlobalScope.launch {
+                        delay(2000L)
+                        val intent = Intent(this@LoginActivity, QueueActivity::class.java)
+                        intent.putExtra(QueueActivity.EXTRA_DATA, user)
+                        startActivity(intent)
+                    }
+                },
+                Response.ErrorListener { response ->
+                    Toast.makeText(this, "${response.toString()}", Toast.LENGTH_SHORT).show()
+                })
 
             queue.add(jsonRequest)
 

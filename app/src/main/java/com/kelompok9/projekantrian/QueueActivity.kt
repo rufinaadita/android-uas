@@ -33,10 +33,10 @@ class QueueActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.antrian_activity)
-
-        val user = intent.extras?.getSerializable(EXTRA_DATA) as User
-
-        tf_username.text = user.name
+//
+//        val user = intent.extras?.getSerializable(EXTRA_DATA) as User
+//
+//        tf_username.text = user.name
 
         btn_ambil_antrian.setOnClickListener {
             if (nomor_antrian == 5) {
@@ -50,8 +50,10 @@ class QueueActivity : AppCompatActivity() {
         dataAntrian()
         restAntrian()
         lastAntrian()
+        getUserName()
 
         btn_refresh.setOnClickListener {
+            getUserName()
             currentAntrian()
             dataAntrian()
             restAntrian()
@@ -66,6 +68,23 @@ class QueueActivity : AppCompatActivity() {
         }
     }
 
+    private fun getUserName() {
+        val queue = Volley.newRequestQueue(this)
+        val url = "http://192.168.100.85:8012/antrian-api/public/api/user/${Session.id}"
+
+        val jsonRequest = JsonObjectRequest(
+            Request.Method.GET, url, null,
+            Response.Listener { response ->
+                val data = response.getJSONObject("data")
+                tf_username.text = data.getString("name")
+            },
+            Response.ErrorListener {
+                Toast.makeText(this, "Sisa Gagal", Toast.LENGTH_SHORT).show()
+            })
+
+        queue.add(jsonRequest)
+    }
+
     private fun restAntrian() {
         val queue = Volley.newRequestQueue(this)
         val url = "http://192.168.100.85:8012/antrian-api/public/api/daftar/rest/${Session.id}"
@@ -77,7 +96,7 @@ class QueueActivity : AppCompatActivity() {
                 tv_restQueue.text = data
             },
             Response.ErrorListener {
-                Toast.makeText(this, "Gagal Antri", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Sisa Gagal", Toast.LENGTH_SHORT).show()
             })
 
         queue.add(jsonRequest)
@@ -91,10 +110,14 @@ class QueueActivity : AppCompatActivity() {
             Request.Method.GET, url, null,
             Response.Listener { response ->
                 val data = response.getJSONObject("data")
-                tv_currentQueue.text = data.getString("nomor_antrian")
+                if(data.getString("nomor_antrian") == "kosong") {
+                    tv_currentQueue.text = "-"
+                } else {
+                    tv_currentQueue.text = data.getString("nomor_antrian")
+                }
             },
             Response.ErrorListener {
-                Toast.makeText(this, "Gagal Antri", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Antri Sekarang Gagal", Toast.LENGTH_SHORT).show()
             })
 
         queue.add(jsonRequest)
@@ -110,13 +133,16 @@ class QueueActivity : AppCompatActivity() {
                 val data = response.getString("nomor_antrian")
                 val status = response.getString("status_antri")
                 tv_antri.text = data
-                if(status == "true") {
+                if(status == "false") {
                     btn_ambil_antrian.isEnabled = false
                     btn_ambil_antrian.setBackgroundColor(Color.GRAY)
+                } else {
+                    btn_ambil_antrian.isEnabled = true
+                    btn_ambil_antrian.setBackgroundColor(Color.parseColor("#06C7AD"))
                 }
             },
             Response.ErrorListener {
-                Toast.makeText(this, "Gagal Antri", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Data Antri gagal", Toast.LENGTH_SHORT).show()
             })
 
         queue.add(jsonRequest)
@@ -130,10 +156,14 @@ class QueueActivity : AppCompatActivity() {
             Request.Method.GET, url, null,
             Response.Listener { response ->
                 val data = response.getString("nomor_antrian")
-                nomor_antrian = data.toInt()
+                if(data == "kosong") {
+                    nomor_antrian = 0
+                } else {
+                    nomor_antrian = data.toInt()
+                }
             },
-            Response.ErrorListener {
-                Toast.makeText(this, "Gagal Antri", Toast.LENGTH_SHORT).show()
+            Response.ErrorListener { response ->
+                Toast.makeText(this, "Antrian terakhir gagal ${response.toString()}", Toast.LENGTH_SHORT).show()
             })
 
         queue.add(jsonRequest)
